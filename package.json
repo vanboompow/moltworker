@@ -40,8 +40,8 @@
   "license": "Apache-2.0",
   "cloudflare": {
     "bindings": {
-      "ANTHROPIC_API_KEY": {
-        "description": "Your [Anthropic API key](https://console.anthropic.com/)."
+      "GOOGLE_API_KEY": {
+        "description": "Your [Google API key](https://aistudio.google.com/apikey)."
       },
       "MOLTBOT_GATEWAY_TOKEN": {
         "description": "Token for gateway access. Generate with: openssl rand -hex 32"

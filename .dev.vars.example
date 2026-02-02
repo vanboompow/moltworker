@@ -1,7 +1,7 @@
 # Copy this to .dev.vars and fill in your values
 # .dev.vars is gitignored and used by wrangler dev
 
-ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=your-google-api-key-here
 
 # Local development mode - skips Cloudflare Access auth and bypasses device pairing
 # DEV_MODE=true

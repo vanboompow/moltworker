@@ -153,13 +153,13 @@ config.agents.defaults.model = config.agents.defaults.model || {};
 config.gateway = config.gateway || {};
 config.channels = config.channels || {};
 
-// Clean up any broken anthropic provider config from previous runs
+// Clean up any broken google provider config from previous runs
 // (older versions didn't include required 'name' field)
-if (config.models?.providers?.anthropic?.models) {
-    const hasInvalidModels = config.models.providers.anthropic.models.some(m => !m.name);
+if (config.models?.providers?.google?.models) {
+    const hasInvalidModels = config.models.providers.google.models.some(m => !m.name);
     if (hasInvalidModels) {
-        console.log('Removing broken anthropic provider config (missing model names)');
-        delete config.models.providers.anthropic;
+        console.log('Removing broken google provider config (missing model names)');
+        delete config.models.providers.google;
     }
 }
 
@@ -223,10 +223,10 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
 }
 
 // Base URL override (e.g., for Cloudflare AI Gateway)
-// Usage: Set AI_GATEWAY_BASE_URL or ANTHROPIC_BASE_URL to your endpoint like:
-//   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic
+// Usage: Set AI_GATEWAY_BASE_URL or GOOGLE_BASE_URL to your endpoint like:
+//   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/google-ai-studio
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/openai
-const baseUrl = (process.env.AI_GATEWAY_BASE_URL || process.env.ANTHROPIC_BASE_URL || '').replace(/\/+$/, '');
+const baseUrl = (process.env.AI_GATEWAY_BASE_URL || process.env.GOOGLE_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
 const isOpenAI = baseUrl.endsWith('/openai');
 
 if (isOpenAI) {
@@ -250,33 +250,27 @@ if (isOpenAI) {
     config.agents.defaults.models['openai/gpt-5'] = { alias: 'GPT-5' };
     config.agents.defaults.models['openai/gpt-4.5-preview'] = { alias: 'GPT-4.5' };
     config.agents.defaults.model.primary = 'openai/gpt-5.2';
-} else if (baseUrl) {
-    console.log('Configuring Anthropic provider with base URL:', baseUrl);
+} else {
+    // Configure Google Gemini provider
+    console.log('Configuring Google Gemini provider with base URL:', baseUrl);
     config.models = config.models || {};
     config.models.providers = config.models.providers || {};
     const providerConfig = {
         baseUrl: baseUrl,
-        api: 'anthropic-messages',
+        api: 'google-gemini',
         models: [
-            { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5', contextWindow: 200000 },
-            { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', contextWindow: 200000 },
-            { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', contextWindow: 200000 },
+            { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', contextWindow: 1000000 },
         ]
     };
     // Include API key in provider config if set (required when using custom baseUrl)
-    if (process.env.ANTHROPIC_API_KEY) {
-        providerConfig.apiKey = process.env.ANTHROPIC_API_KEY;
+    if (process.env.GOOGLE_API_KEY) {
+        providerConfig.apiKey = process.env.GOOGLE_API_KEY;
     }
-    config.models.providers.anthropic = providerConfig;
+    config.models.providers.google = providerConfig;
     // Add models to the allowlist so they appear in /models
     config.agents.defaults.models = config.agents.defaults.models || {};
-    config.agents.defaults.models['anthropic/claude-opus-4-5-20251101'] = { alias: 'Opus 4.5' };
-    config.agents.defaults.models['anthropic/claude-sonnet-4-5-20250929'] = { alias: 'Sonnet 4.5' };
-    config.agents.defaults.models['anthropic/claude-haiku-4-5-20251001'] = { alias: 'Haiku 4.5' };
-    config.agents.defaults.model.primary = 'anthropic/claude-opus-4-5-20251101';
-} else {
-    // Default to Anthropic without custom base URL (uses built-in pi-ai catalog)
-    config.agents.defaults.model.primary = 'anthropic/claude-opus-4-5';
+    config.agents.defaults.models['google/gemini-3-flash-preview'] = { alias: 'Gemini Flash' };
+    config.agents.defaults.model.primary = 'google/gemini-3-flash-preview';
 }
 
 // Write updated config
